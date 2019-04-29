@@ -8,6 +8,10 @@ use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 class mymodule extends Module implements WidgetInterface{
     
+    public $controls = array();
+    
+    public $button = array();
+    
     public function __construct() {
         
         $this->name = "mymodule";
@@ -24,6 +28,30 @@ class mymodule extends Module implements WidgetInterface{
         $this->displayName = $this->trans('Mi primer módulo', array(), 'Modules.mymodule.Admin');
         $this->description = $this->trans('Módulo desde cero con el equipo de Pixelpro.', array(), 'Admin.Global');
         $this->ps_versions_compliancy = array('min' => '1.7.0.0', 'max' => _PS_VERSION_);
+        
+        $this->createControls();
+    }
+    
+        
+    protected function createControls() {
+        
+        $this->controls['MYMODULE_SAVE_NAME'] = array(
+            'controlName' => 'MYMODULE_SAVE_NAME',
+            'values' => null,
+            'label' => $this->l('Name'),
+            'desc' => $this->l('Enter your Name')
+        );        
+        $this->controls['MYMODULE_SAVE_LAST_NAME'] = array(
+            'controlName' => 'MYMODULE_SAVE_LAST_NAME',
+            'values' => null,
+            'label' => $this->l('Last Name'),
+            'desc' => $this->l('Enter your Last Name')
+        );
+        // Button Save
+        $this->button['MYMODULE_SAVE_FORM'] = array(
+            'controlName' => 'MYMODULE_SAVE_FORM',
+            'label' => $this->l('Save'),
+        );
     }
     
     
@@ -114,6 +142,17 @@ class mymodule extends Module implements WidgetInterface{
     
         }
     }
+    
+    protected function customPostProcess() {    
+        $languages = $this->context->controller->getLanguages();
+        foreach($this->controls as $control) {
+            foreach($languages as $lang) {
+                $composeName = $control['controlName'] . '_' . $lang["id_lang"];
+                Configuration::updateValue($composeName, Tools::getValue($composeName));
+            }
+        }
+    }
+    
     public function install() {
        Configuration::updateValue('MYMODULE_LIVE_MODE', false);
        
@@ -138,14 +177,39 @@ class mymodule extends Module implements WidgetInterface{
             $this->postProcess();
     
         }
+        
+        if((bool) Tools::isSubmit($this->button['MYMODULE_SAVE_FORM']['controlName'])) {
+            $this->customPostProcess();
+        }
         $this->context->smarty->assign($this->name, array(
-            'path' => $this->_path
+            'path' => $this->_path,
+            'languagesArray' => $this->context->controller->getLanguages(),
+            'currentLang' => $this->context->language->id,
+            'customControls' => $this->controls,
+            'saveButton' => $this->button,
+            'postAction' => $this->context->link->getAdminLink('AdminModules', false).'&configure='
+                .$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name 
+                .'&token='.Tools::getAdminTokenLite('AdminModules')
         ));
+        
+        foreach($this->controls as $control) {
+            $this->controls[$control['controlName']]['values'] = $this->getLangValues($control['controlName']);
+        }
         
         $customTpl = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
         $autoGenerateTpl = $this->renderForm();
         
         return $autoGenerateTpl . $customTpl;
+    }
+    
+    public function getLangValues($_controlName) {
+        $languages = $this->context->controller->getLanguages();
+        $values = array();
+        foreach($languages as $lang) {
+            $composeName = $_controlName . '_' . $lang["id_lang"];
+            $values[$lang["id_lang"]] = Configuration::get($composeName);
+        }
+        return $values;
     }
     
     public function hookHeader() {        
