@@ -1,0 +1,18 @@
+.mymodule-admin-panel .form-wrapper .form-group {
+    clear: both;
+    display: block;
+    height: 28px
+}
+
+.mymodule-admin-panel .form-wrapper .panel-footer {
+    clear: both;
+}
+
+.mymodule-admin-panel .form-wrapper .control-label {
+    text-align: right;
+}
+
+.mymodule-admin-panel .form-wrapper .help-block {
+    clear: both;
+} 
+

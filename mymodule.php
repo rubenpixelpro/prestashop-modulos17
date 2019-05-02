@@ -47,10 +47,17 @@ class mymodule extends Module implements WidgetInterface{
             'label' => $this->l('Last Name'),
             'desc' => $this->l('Enter your Last Name')
         );
+        $this->controls['MYMODULE_HTML'] = array(
+            'controlName' => 'MYMODULE_HTML',
+            'values' => null,
+            'label' => $this->l('HTML'),
+            'desc' => $this->l('Escribe tu html personalizado')
+        );
         // Button Save
         $this->button['MYMODULE_SAVE_FORM'] = array(
             'controlName' => 'MYMODULE_SAVE_FORM',
-            'label' => $this->l('Save'),
+            'label' => $this->l('Save')
+       
         );
     }
     
@@ -148,7 +155,7 @@ class mymodule extends Module implements WidgetInterface{
         foreach($this->controls as $control) {
             foreach($languages as $lang) {
                 $composeName = $control['controlName'] . '_' . $lang["id_lang"];
-                Configuration::updateValue($composeName, Tools::getValue($composeName));
+                Configuration::updateValue($composeName, Tools::getValue($composeName),true);
             }
         }
     }
@@ -181,6 +188,9 @@ class mymodule extends Module implements WidgetInterface{
         if((bool) Tools::isSubmit($this->button['MYMODULE_SAVE_FORM']['controlName'])) {
             $this->customPostProcess();
         }
+        
+        $this->getCustomValues(); 
+        
         $this->context->smarty->assign($this->name, array(
             'path' => $this->_path,
             'languagesArray' => $this->context->controller->getLanguages(),
@@ -192,18 +202,21 @@ class mymodule extends Module implements WidgetInterface{
                 .'&token='.Tools::getAdminTokenLite('AdminModules')
         ));
         
-        foreach($this->controls as $control) {
-            $this->controls[$control['controlName']]['values'] = $this->getLangValues($control['controlName']);
-        }
-        
+               
         $customTpl = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
         $autoGenerateTpl = $this->renderForm();
         
         return $autoGenerateTpl . $customTpl;
     }
     
+    protected function getCustomValues() {
+        foreach($this->controls as $control) {
+	    $this->controls[$control['controlName']]['values'] = $this->getLangValues($control['controlName']);
+        }
+    }
+    
     public function getLangValues($_controlName) {
-        $languages = $this->context->controller->getLanguages();
+        $languages = Language::getLanguages(false);
         $values = array();
         foreach($languages as $lang) {
             $composeName = $_controlName . '_' . $lang["id_lang"];
@@ -221,12 +234,16 @@ class mymodule extends Module implements WidgetInterface{
     }
     
     public function hookBackOfficeHeader() {
-
+        $this->context->controller->addCSS($this->_path.'views/css/mymoduleAdmin.css');
     }
     
     public function hookDisplayHome() {
+        $this->getCustomValues();
+        
         $this->context->smarty->assign($this->name, array(
-            'path' => $this->_path
+            'path' => $this->_path,
+            'html' => $this->controls['MYMODULE_HTML'],
+            'currentLanguage' => $this->context->language->id
         ));
         
         return $this->context->smarty->fetch($this->local_path.'views/templates/hook/displayHome.tpl');

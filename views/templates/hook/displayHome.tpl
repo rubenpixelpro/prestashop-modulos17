@@ -1,1 +1,1 @@
-Hola desde el frontend!
+{$mymodule.html['values'][$mymodule.currentLanguage] nofilter}
