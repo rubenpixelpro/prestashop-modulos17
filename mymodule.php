@@ -231,8 +231,10 @@ class mymodule extends Module implements WidgetInterface{
     }
     
     public function hookHeader() {        
-
-}
+        $this->context->controller->registerJavascript('modules-mymodule',
+            'modules/'.$this->name.'/views/js/mymoduleFront.js',
+            ['position' => 'bottom', 'priority' => 150]);
+    }
     
     public function hookFooter() {
        

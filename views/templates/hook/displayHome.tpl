@@ -35,3 +35,13 @@
         </div>
     {/foreach}
 </div> 
+
+<script>
+    var combo = ".mymodule-select-category",
+        resultSelector = '.mymodule-result',
+        getProduct= "{$mymodule.path}views/ajax/getProductByCatId.php";
+</script>    
+
+
+
+
