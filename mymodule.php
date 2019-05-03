@@ -30,8 +30,13 @@ class mymodule extends Module implements WidgetInterface{
         $this->ps_versions_compliancy = array('min' => '1.7.0.0', 'max' => _PS_VERSION_);
         
         $this->createControls();
+        
+        $this->getDependencies();
     }
     
+    private function getDependencies() {
+        require_once 'classes/getProductByCatId.php';
+    }
         
     protected function createControls() {
         
@@ -240,13 +245,41 @@ class mymodule extends Module implements WidgetInterface{
     public function hookDisplayHome() {
         $this->getCustomValues();
         
+        $categoriesArray = $this->cleanCategoriesData(Category::getCategories());
+        
+        $getProduct = new getProductByCatId((int)$categoriesArray[1]['id_category'], 1);
+        
         $this->context->smarty->assign($this->name, array(
             'path' => $this->_path,
             'html' => $this->controls['MYMODULE_HTML'],
-            'currentLanguage' => $this->context->language->id
+            'currentLanguage' => $this->context->language->id,
+            'comboCategories' => $categoriesArray,
+            'getProductByCategoryId' => $getProduct->productCategory
         ));
         
         return $this->context->smarty->fetch($this->local_path.'views/templates/hook/displayHome.tpl');
+    }
+    
+    public function cleanCategoriesData($_array) {
+        $cleanArray = array();
+        
+        foreach($_array as $key => $catVal) {
+            if(is_array($catVal)) {
+                foreach($catVal as $category) {
+                    $cleanArray[$key] = array(
+                        'id_category' => $category['infos']['id_category'],
+                        'name' => $category['infos']['name'],
+                        'link_rewrite' => $category['infos']['link_rewrite'],
+                    );
+                }
+               
+            }
+     
+        }
+        unset($cleanArray[0]);
+        
+        return $cleanArray;
+        
     }
     
     public function hookDisplayLeftColumn() {
