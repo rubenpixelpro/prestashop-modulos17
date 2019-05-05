@@ -36,6 +36,9 @@ class mymodule extends Module implements WidgetInterface{
     
     private function getDependencies() {
         require_once 'classes/getProductByCatId.php';
+        require_once 'models/ipModel.php';
+        require_once 'controllers/saveIp.php';
+        
     }
         
     protected function createControls() {
@@ -234,6 +237,22 @@ class mymodule extends Module implements WidgetInterface{
         $this->context->controller->registerJavascript('modules-mymodule',
             'modules/'.$this->name.'/views/js/mymoduleFront.js',
             ['position' => 'bottom', 'priority' => 150]);
+        $saveIpEntities = new saveIpEntities();
+        $saveIpEntities->ip = $this->checkLocalhost(Tools::getRemoteAddr());
+        $saveIpEntities->browser = Tools::getUserBrowser(); 
+        
+    }
+    
+    private function checkLocalhost($_ip) {
+        $ip = null;
+         switch ($_ip) {
+            case '::1':
+                $ip = Tools::getServerName();
+                break;
+            default :
+                $ip = $_ip;
+        }
+        return $ip;
     }
     
     public function hookFooter() {
