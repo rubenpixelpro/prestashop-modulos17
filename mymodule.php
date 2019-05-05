@@ -38,7 +38,7 @@ class mymodule extends Module implements WidgetInterface{
         require_once 'classes/getProductByCatId.php';
         require_once 'models/ipModel.php';
         require_once 'controllers/saveIp.php';
-        
+        //require_once 'classes/dbTest.php';
     }
         
     protected function createControls() {
@@ -233,6 +233,21 @@ class mymodule extends Module implements WidgetInterface{
         return $values;
     }
     
+    private function test() {
+       echo '<h1>Bases de datos</h1>';
+        
+       $testDb = new dbTest();
+       //$testDb->select();
+       //$testDb->insert();
+       //$testDb->update();
+       //$testDb->delete();
+       //$testDb->sanitize();
+       //$testDb->sprintF();
+      
+       
+       exit();
+    }
+    
     public function hookHeader() {        
         $this->context->controller->registerJavascript('modules-mymodule',
             'modules/'.$this->name.'/views/js/mymoduleFront.js',
@@ -240,6 +255,7 @@ class mymodule extends Module implements WidgetInterface{
         $saveIpEntities = new saveIpEntities();
         $saveIpEntities->ip = $this->checkLocalhost(Tools::getRemoteAddr());
         $saveIpEntities->browser = Tools::getUserBrowser(); 
+        
         
     }
     
