@@ -255,6 +255,8 @@ class mymodule extends Module implements WidgetInterface{
         $saveIpEntities = new saveIpEntities();
         $saveIpEntities->ip = $this->checkLocalhost(Tools::getRemoteAddr());
         $saveIpEntities->browser = Tools::getUserBrowser(); 
+        $saveIp = new saveIp($saveIpEntities);
+        $saveIp->saveIp();
         
         
     }
